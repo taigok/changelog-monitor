@@ -1,11 +1,11 @@
 {
   "name": "changelog-monitor",
-  "image": "mcr.microsoft.com/devcontainers/python:3.13",
-
+  "image": "mcr.microsoft.com/devcontainers/python:3.14",
   "features": {
-    "ghcr.io/astral-sh/devcontainer-features/uv:2": {}
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/va-h/devcontainers-features/uv:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:latest": {}
   },
-
   "customizations": {
     "vscode": {
       "extensions": [
@@ -30,9 +30,7 @@
       }
     }
   },
-
   "postCreateCommand": "bash .devcontainer/postCreate.sh",
-
   "remoteEnv": {
     "UV_PROJECT_ENVIRONMENT": "${containerWorkspaceFolder}/.venv"
   }

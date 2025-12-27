@@ -1,0 +1,44 @@
+# グローバル設定
+translation:
+  model: "gemini-2.0-flash-exp"
+  max_tokens: 2048
+  temperature: 0.3
+
+notification:
+  max_message_length: 800
+
+# 監視対象リポジトリ
+# 以下のコメントアウトされた例を参考に、監視したいリポジトリを追加してください
+repositories: []
+
+# 例1: Claude Code
+# - name: "Claude Code"
+#   owner: "anthropics"
+#   repo: "claude-code"
+#   file: "CHANGELOG.md"
+#   branch: "main"
+#   enabled: true
+
+# 例2: Anthropic SDK Python
+# - name: "Anthropic SDK Python"
+#   owner: "anthropics"
+#   repo: "anthropic-sdk-python"
+#   file: "CHANGELOG.md"
+#   branch: "main"
+#   enabled: true
+
+# 例3: Anthropic SDK TypeScript
+# - name: "Anthropic SDK TypeScript"
+#   owner: "anthropics"
+#   repo: "anthropic-sdk-typescript"
+#   file: "CHANGELOG.md"
+#   branch: "main"
+#   enabled: true
+
+# フィールド説明:
+# - name: 表示名（LINE通知に表示される、日本語可）
+# - owner: GitHubオーナー名
+# - repo: リポジトリ名
+# - file: 監視するファイル（通常はCHANGELOG.md）
+# - branch: ブランチ名（デフォルト: main）
+# - enabled: 有効/無効（デフォルト: true、falseで一時的に無効化可能）

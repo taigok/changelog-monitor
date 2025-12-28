@@ -2,7 +2,7 @@
 
 ## プロジェクト概要
 
-このプロジェクトは、GitHubリポジトリのCHANGELOG.mdを定期的に監視し、更新があった際にGemini APIで日本語翻訳してLINE Notifyに通知する自動化システムです。
+このプロジェクトは、GitHubリポジトリのCHANGELOG.mdを定期的に監視し、更新があった際にGemini APIで日本語翻訳してDiscordに通知する自動化システムです。
 
 ### 動作フロー
 
@@ -11,7 +11,7 @@
 3. **変更検出** - スナップショットとハッシュ比較
 4. **差分抽出** - 新しく追加された行のみを抽出
 5. **日本語翻訳** - Gemini APIで技術文書として翻訳
-6. **LINE通知** - 翻訳結果をLINE Notifyで送信
+6. **Discord通知** - 翻訳結果をDiscord Webhookで送信
 7. **スナップショット更新** - 次回比較用に保存
 
 ## 技術スタック
@@ -32,7 +32,7 @@
 scripts/
 ├── fetcher.py       # GitHubからCHANGELOG取得・差分抽出
 ├── translator.py    # Gemini API翻訳
-├── notifier.py      # LINE Notify送信
+├── notifier.py      # Discord Webhook送信
 └── monitor.py       # メインロジック・スナップショット管理
 ```
 
@@ -54,7 +54,7 @@ monitor.py
   │     └─→ Gemini 2.0 Flash API
   │
   ├─→ notifier.send()
-  │     └─→ LINE Notify API
+  │     └─→ Discord Webhook API
   │
   └─→ SnapshotManager.save_snapshot()
         └─→ snapshots/{owner}_{repo}_CHANGELOG.json
@@ -104,21 +104,21 @@ monitor.py
 
 **Notifierクラス** (`scripts/notifier.py`)
 
-- **API**: LINE Notify (`https://notify-api.line.me/api/notify`)
+- **API**: Discord Webhook
 - **タイムアウト**: 10秒
 
 **メッセージフォーマット:**
 ```
-📄 {repo_name} CHANGELOG更新
+📄 **{repo_name} CHANGELOG更新**
 
 {translated_text}
 
-詳細: {repo_url}
+**詳細:** {repo_url}
 ```
 
 **文字数制限:**
-- LINE Notify上限: 1000文字
-- 翻訳テキスト部分: 最大800文字
+- Discord上限: 2000文字
+- 翻訳テキスト部分: 最大1800文字
 - 超過時: `truncate_message()`で切り詰め
   - 改行位置を優先
   - スペース位置を次点
@@ -198,8 +198,8 @@ uv run ruff format .
 **必須:**
 - `GEMINI_API_KEY`: Gemini APIキー
   - 取得: https://aistudio.google.com/app/apikey
-- `LINE_NOTIFY_TOKEN`: LINE Notifyトークン
-  - 取得: https://notify-bot.line.me/my/
+- `DISCORD_WEBHOOK_URL`: Discord Webhook URL
+  - 取得: Discordサーバーのチャンネル設定 → 連携サービス → ウェブフック
 
 **設定場所:**
 - ローカル: `.env`ファイル
@@ -215,7 +215,7 @@ translation:
   temperature: 0.3                # 温度パラメータ
 
 notification:
-  max_message_length: 800         # 翻訳テキストの最大文字数
+  max_message_length: 1800        # 翻訳テキストの最大文字数
 ```
 
 **リポジトリ設定:**
@@ -257,21 +257,22 @@ repositories:
 - ローカル: `.env`ファイルに`GEMINI_API_KEY=...`を追加
 - GitHub Actions: Repository Secretsに`GEMINI_API_KEY`を追加
 
-### 2. "LINE_NOTIFY_TOKEN environment variable is required"
+### 2. "DISCORD_WEBHOOK_URL environment variable is required"
 
 **原因:** 環境変数が設定されていない
 
 **解決策:**
-- ローカル: `.env`ファイルに`LINE_NOTIFY_TOKEN=...`を追加
-- GitHub Actions: Repository Secretsに`LINE_NOTIFY_TOKEN`を追加
+- ローカル: `.env`ファイルに`DISCORD_WEBHOOK_URL=...`を追加
+- GitHub Actions: Repository Secretsに`DISCORD_WEBHOOK_URL`を追加
 
 ### 3. 通知が届かない
 
 **確認項目:**
-1. LINE Notifyトークンが有効か確認
-2. トークンが正しくSecretsに設定されているか確認
-3. GitHub Actionsのログを確認
-4. notifier.pyのログを確認
+1. Discord Webhook URLが有効か確認
+2. Webhook URLが無効化されていないか確認
+3. URLが正しくSecretsに設定されているか確認
+4. GitHub Actionsのログを確認
+5. notifier.pyのログを確認
 
 ### 4. 翻訳が失敗する（"[翻訳失敗]"）
 
@@ -306,8 +307,8 @@ repositories:
 - **月間実行回数**: 約2,880回
 - **コスト**: $0（無料枠内）
 
-### LINE Notify
-- **制限**: 1時間あたり1000件
+### Discord Webhook
+- **制限**: 30リクエスト/分（通常使用では十分）
 - **実行頻度**: 変更時のみ
 - **コスト**: $0（完全無料）
 
@@ -330,9 +331,9 @@ A: はい、使えます。ただしGitHub Actionsの無料枠は月2,000分で�
 A: はい、`.github/workflows/monitor.yml`のcron式を変更してください。
 例: `*/30 * * * *`（30分ごと）
 
-### Q: 複数のLINEグループに通知できますか？
+### Q: 複数のDiscordチャンネルに通知できますか？
 
-A: 現在は1つのトークンのみサポート。複数通知したい場合は、notifier.pyを拡張して複数トークンに対応する必要があります。
+A: 現在は1つのWebhook URLのみサポート。複数チャンネルに通知したい場合は、notifier.pyを拡張して複数URLに対応する必要があります。
 
 ### Q: CHANGELOGの途中の変更は検出されますか？
 

@@ -1,6 +1,6 @@
 # グローバル設定
 translation:
-  model: "gemini-2.0-flash-exp"
+  model: "gemini-2.0-flash-lite"
   max_tokens: 2048
   temperature: 0.3
 

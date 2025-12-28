@@ -1,15 +1,15 @@
 # changelog-monitor
 
-GitHub CHANGELOG監視・翻訳・LINE通知システム
+GitHub CHANGELOG監視・翻訳・Discord通知システム
 
-GitHubリポジトリのCHANGELOG.mdを自動監視し、更新があったらGemini APIで日本語翻訳してLINE Notifyに通知します。
+GitHubリポジトリのCHANGELOG.mdを自動監視し、更新があったらGemini APIで日本語翻訳してDiscordに通知します。
 
 ## Features
 
 - GitHub CHANGELOG.mdの自動監視（15分間隔）
 - Gemini 2.0 Flash による高品質な日本語翻訳
 - 技術用語の適切な保持（バージョン番号、API名、コマンド等）
-- LINE Notifyによる即時通知
+- Discord Webhookによる即時通知
 - Dev Container対応の開発環境
 - 完全無料（無料APIの範囲内）
 
@@ -27,14 +27,14 @@ GitHubリポジトリのCHANGELOG.mdを自動監視し、更新があったらGe
 
 **無料枠:** 15 RPM（15分間隔の実行なら十分）
 
-#### LINE Notify Token
+#### Discord Webhook URL
 
-1. [LINE Notify](https://notify-bot.line.me/my/) にアクセス
-2. LINEアカウントでログイン
-3. "トークンを発行する" をクリック
-4. トークン名を入力（例: "CHANGELOG通知"）
-5. 通知先を選択（1:1またはグループ）
-6. トークンをコピー（**この画面でのみ表示されます**）
+1. Discordサーバーで通知を受け取りたいチャンネルを選択
+2. チャンネル設定（歯車アイコン）→「連携サービス」を開く
+3. 「ウェブフック」タブを選択
+4. 「新しいウェブフック」をクリック
+5. ウェブフック名を入力（例: "CHANGELOG Monitor"）
+6. 「ウェブフックURLをコピー」をクリック
 
 ### 2. ローカル開発環境（Dev Container）
 
@@ -62,7 +62,7 @@ GitHubリポジトリのCHANGELOG.mdを自動監視し、更新があったらGe
    `.env`:
    ```
    GEMINI_API_KEY=your_actual_api_key_here
-   LINE_NOTIFY_TOKEN=your_actual_token_here
+   DISCORD_WEBHOOK_URL=your_discord_webhook_url_here
    ```
 
 ### 3. GitHub Actions設定
@@ -78,7 +78,7 @@ GitHub Actionsの無料枠を利用するため、リポジトリはパブリッ
 3. "New repository secret" をクリック
 4. 以下のSecretsを追加:
    - `GEMINI_API_KEY`: 取得したGemini APIキー
-   - `LINE_NOTIFY_TOKEN`: 取得したLINE Notifyトークン
+   - `DISCORD_WEBHOOK_URL`: 取得したDiscord Webhook URL
 
 ## Configuration
 
@@ -144,17 +144,17 @@ uv run python scripts/monitor.py
 
 設定後、15分ごとに自動実行されます。スナップショットは自動的にコミット・プッシュされます。
 
-## LINE通知の例
+## Discord通知の例
 
 ```
-📄 Claude Code CHANGELOG更新
+📄 **Claude Code CHANGELOG更新**
 
 【v2.0.75】
 - LSP（Language Server Protocol）ツールを追加し、定義へのジャンプ、参照の検索、ホバードキュメントなどのコードインテリジェンス機能を実装
 - Kitty、Alacritty、Zed、Warpターミナル用の /terminal-setup サポートを追加
 ...
 
-詳細: https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md
+**詳細:** https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md
 ```
 
 ## Development
@@ -182,7 +182,7 @@ uv run ruff format .
 すべて無料枠内で動作します:
 
 - **Gemini API**: 無料（15 RPM制限、15分間隔なら問題なし）
-- **LINE Notify**: 完全無料
+- **Discord Webhook**: 完全無料
 - **GitHub Actions**: パブリックリポジトリは無料
 
 ## License
@@ -199,15 +199,16 @@ Pull requestsを歓迎します！
 
 `.env`ファイルに`GEMINI_API_KEY`が設定されていることを確認してください。
 
-### "LINE_NOTIFY_TOKEN environment variable is required"
+### "DISCORD_WEBHOOK_URL environment variable is required"
 
-`.env`ファイルに`LINE_NOTIFY_TOKEN`が設定されていることを確認してください。
+`.env`ファイルに`DISCORD_WEBHOOK_URL`が設定されていることを確認してください。
 
 ### 通知が届かない
 
-1. LINE Notifyトークンが正しいか確認
-2. GitHub Secretsが正しく設定されているか確認
-3. GitHub Actionsのログを確認
+1. Discord Webhook URLが正しいか確認
+2. Webhook URLが無効化されていないか確認
+3. GitHub Secretsが正しく設定されているか確認
+4. GitHub Actionsのログを確認
 
 ### 翻訳が失敗する
 

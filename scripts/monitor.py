@@ -273,7 +273,7 @@ class ChangelogMonitor:
         success = self.notifier.send(name, translated, repo_url)
 
         if success:
-            self.logger.info("  📤 LINE notification sent")
+            self.logger.info("  📤 Discord notification sent")
         else:
             raise Exception("Failed to send notification")
 

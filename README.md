@@ -19,7 +19,7 @@ GitHubリポジトリのCHANGELOG.mdを自動監視し、更新があったらGe
 
 #### Gemini API Key
 
-1. [Google AI Studio](https://aistudio.google.com/app/apikey) にアクセス
+1. [Google AI Studio](https://aistudio.google.com/app/api-keys) にアクセス
 2. Googleアカウントでログイン
 3. "Create API Key" をクリック
 4. 既存のGCPプロジェクトを選択または新規作成

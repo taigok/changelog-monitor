@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from fetcher import Fetcher
 from notifier import Notifier

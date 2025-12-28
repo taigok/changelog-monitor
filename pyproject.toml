@@ -1,21 +1,12 @@
 [project]
 name = "changelog-monitor"
 version = "0.1.0"
-description = "GitHub CHANGELOG monitoring, translation, and LINE notification system"
+description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
-    "google-genai>=0.2.0",
-    "pyyaml>=6.0.1",
-    "requests>=2.31.0",
+    "google-genai>=1.56.0",
+    "python-dotenv>=1.2.1",
+    "pyyaml>=6.0.3",
+    "requests>=2.32.5",
 ]
-
-[tool.uv]
-dev-dependencies = [
-    "pytest>=8.0.0",
-    "ruff>=0.8.0",
-]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"

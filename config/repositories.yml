@@ -8,17 +8,13 @@ notification:
   max_message_length: 800
 
 # 監視対象リポジトリ
-# 以下のコメントアウトされた例を参考に、監視したいリポジトリを追加してください
-repositories: []
-
-# 例1: Claude Code
-# - name: "Claude Code"
-#   owner: "anthropics"
-#   repo: "claude-code"
-#   file: "CHANGELOG.md"
-#   branch: "main"
-#   enabled: true
-
+repositories:
+  - name: "Claude Code"
+    owner: "anthropics"
+    repo: "claude-code"
+    file: "CHANGELOG.md"
+    branch: "main"
+    enabled: true
 # 例2: Anthropic SDK Python
 # - name: "Anthropic SDK Python"
 #   owner: "anthropics"

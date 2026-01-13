@@ -93,6 +93,7 @@ class SnapshotManager:
                 "file": file_path,
                 "branch": branch,
             },
+            "content": content,
             "content_hash": self.calculate_hash(content),
             "last_updated": datetime.now(timezone.utc).isoformat(),
             "last_checked": datetime.now(timezone.utc).isoformat(),
@@ -252,9 +253,7 @@ class ChangelogMonitor:
         # Extract diff
         previous_content = None
         if snapshot:
-            # We don't store the full content, so we'll treat this as a full update
-            # In a production system, you might want to store the previous content
-            pass
+            previous_content = snapshot.get("content")
 
         diff = self.fetcher.extract_diff(current_content, previous_content)
         if not diff.strip():

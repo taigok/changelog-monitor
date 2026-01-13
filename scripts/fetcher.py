@@ -1,6 +1,7 @@
 """GitHub CHANGELOG fetcher module."""
 
 import logging
+import re
 from typing import Optional
 
 import requests
@@ -58,6 +59,49 @@ class Fetcher:
             self.logger.error(f"Error fetching {url}: {e}")
             return None
 
+    def extract_latest_version_section(self, content: str) -> Optional[str]:
+        """Extract the latest version section from CHANGELOG.
+
+        Args:
+            content: CHANGELOG content
+
+        Returns:
+            Latest version section or None if no version found
+        """
+        # Pattern to match version headers like:
+        # ## 2.1.6, ## [2.1.6], # v2.1.6, ## Version 2.1.6
+        version_pattern = r"^##?\s+(?:\[)?(?:v|version\s+)?(\d+\.\d+(?:\.\d+)?(?:\.\d+)?)"
+
+        lines = content.split("\n")
+        start_idx = None
+        end_idx = None
+
+        # Find the first version header
+        for i, line in enumerate(lines):
+            if re.match(version_pattern, line.strip(), re.IGNORECASE):
+                if start_idx is None:
+                    start_idx = i
+                    self.logger.info(f"Found first version at line {i}: {line.strip()}")
+                else:
+                    # Found the next version, so the first section ends here
+                    end_idx = i
+                    break
+
+        if start_idx is None:
+            self.logger.warning("No version section found in CHANGELOG")
+            return None
+
+        # If no second version found, take until the end
+        if end_idx is None:
+            end_idx = len(lines)
+
+        # Extract the section
+        section_lines = lines[start_idx:end_idx]
+        result = "\n".join(section_lines).strip()
+
+        self.logger.info(f"Extracted version section ({end_idx - start_idx} lines)")
+        return result
+
     def extract_diff(
         self,
         current: str,
@@ -72,36 +116,29 @@ class Fetcher:
             max_lines: Maximum number of lines to extract
 
         Returns:
-            Diff text containing newly added lines
+            Diff text containing newly added lines (latest version section only)
         """
         if previous is None:
-            # First run: return first max_lines
+            # First run: extract latest version section
+            latest_section = self.extract_latest_version_section(current)
+            if latest_section:
+                self.logger.info("First run: extracted latest version section")
+                return latest_section
+            # Fallback to first max_lines if no version found
             lines = current.split("\n")
             result = "\n".join(lines[:max_lines])
             self.logger.info(f"First run: extracted {min(len(lines), max_lines)} lines")
             return result
 
-        # Extract new lines from the beginning
-        current_lines = current.split("\n")
-        previous_lines = previous.split("\n")
+        # Extract latest version section from current
+        current_latest = self.extract_latest_version_section(current)
+        previous_latest = self.extract_latest_version_section(previous)
 
-        # Find where they diverge
-        diff_lines = []
-        for i, line in enumerate(current_lines):
-            if i >= len(previous_lines) or line != previous_lines[i]:
-                diff_lines.append(line)
-            else:
-                # Once we find a matching line at the same position,
-                # we've found where the old content starts
-                break
+        # If we have a new version section that's different from the previous one
+        if current_latest and current_latest != previous_latest:
+            self.logger.info("New version detected")
+            return current_latest
 
-        # Limit to max_lines
-        result_lines = diff_lines[:max_lines]
-        result = "\n".join(result_lines)
-
-        if diff_lines:
-            self.logger.info(f"Extracted {len(result_lines)} new lines (total new: {len(diff_lines)})")
-        else:
-            self.logger.info("No differences found")
-
-        return result
+        # If no change in version section, return empty
+        self.logger.info("No new version section detected")
+        return ""
